@@ -58,7 +58,7 @@ function writeDom() {
                                             type="button" class="btn btn-sm btn-outline-secondary view"
                                             data-bs-toggle="modal" 
                                             data-bs-target="#exampleModal"
-                                            data-edit-id="${game.id}"
+                                            data-view-id="${game.id}"
                                             >                                            
                                             View
                                         </button
@@ -89,7 +89,7 @@ writeDom()
 const viewButtons = document.querySelectorAll(".view")
 viewButtons.forEach((btn) => {
 	btn.addEventListener("click", (e) => {
-		viewModal(e.target.getAttribute("data-edit-id"))
+		viewModal(e.target.getAttribute("data-view-id"))
 	})
 })
 
@@ -101,24 +101,84 @@ editButtons.forEach((btn) => {
 });
 
 function editModal(gameId) {
+	// Trouvez le jeu en fonction de son identifiant
 	const result = gamesList.findIndex((game) => game.id === parseInt(gameId))
-	fetch("./form.html").then((response) => {
-		response.text().then((form) => {
+	// Injectez le formulaire dans le corps du modal
+	fetch("./form.html").then((data) => {
+		data.text().then((form) => {
+			// Modifiez le titre et le corps du modal
+			const selectedGame = gamesList[result]
 			modifyModal("Mode Edition", form)
+			modifyForm({
+				title: selectedGame.title,
+				year: selectedGame.year,
+				imageUrl: selectedGame.imageUrl,
+			})
+            document
+            .querySelector('button[type="submit"]')
+            .addEventListener("click", () =>
+                updateGames(title.value, year.value, imageUrl.value, gameId)
+            )
 		})
 	})
 }
 
+function modifyForm(gameData) {
+	const form = document.querySelector("form")
+	form.title.value = gameData.title
+	form.year.value = gameData.year
+	form.imageUrl.value = gameData.imageUrl
+}
+
 function modifyModal(modalTitle, modalBody) {
-	// Écrir le nom du jeu dans le titre du modal
+	// Écrire le nom du jeu dans le titre du modal
 	document.querySelector(".modal-title").textContent = modalTitle
+	// Écrire dans le corps du modal
 	document.querySelector(".modal-body").innerHTML = modalBody
+	// Écrire dans le footer
+	document.querySelector(".modal-footer").innerHTML = `
+		<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+			Close
+		</button>
+		<button type="submit" data-bs-dismiss="modal" class="btn btn-primary">Submit</button>
+</form>`
 }
 
 function viewModal(gameId) {
 	// console.log(gameId, gamesList)
 	// Trouvez le jeu en fonction de son identifiant
 	const result = gamesList.findIndex((game) => game.id === parseInt(gameId))
-	const modalBody = `<h2>Hello world !!</h2>`
+	// passer une image comme corps du modal
+	const modalBody = `<img src="${gamesList[result].imageUrl}" alt="${gamesList[result].title}" class="img-fluid" />`
 	modifyModal(gamesList[result].title, modalBody)
+	// edit footer
+	// Écrire dans le footer
+	document.querySelector(".modal-footer").innerHTML = `
+		<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+			Close
+		</button>
+</form>`
+}
+
+function updateGames(title, year, imageUrl, gameId) {
+	// Trouvez le jeu en fonction de son identifiant
+	const index = gamesList.findIndex((game) => game.id === parseInt(gameId))
+
+	gamesList[index].title = title
+	gamesList[index].year = year
+	gamesList[index].imageUrl = imageUrl
+	document.querySelector(".row").innerHTML = "" // Nous supprimons toutes les données des jeux dans le DOM.
+	writeDom()
+	const editButtons = document.querySelectorAll(".edit");
+	editButtons.forEach((btn) => {
+		btn.addEventListener("click", (e) => {
+			editModal(e.target.getAttribute("data-edit-id"));
+		});
+	});
+	const viewButtons = document.querySelectorAll(".view");
+	viewButtons.forEach((btn) => {
+		btn.addEventListener("click", (e) => {
+			viewModal(e.target.getAttribute("data-view-id"));
+		});
+	});
 }
