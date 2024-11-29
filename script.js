@@ -54,16 +54,65 @@ function writeDom() {
                                 <p class="card-text">${game.year}</p>
                                 <div class="d-flex justify-content-between align-items-center">
                                     <div class="btn-group">
-                                        <button type="button" class="btn btn-sm btn-outline-secondary"
-                                        data-bs-toggle="modal" data-bs-target="#exampleModal">View</button>
-                                        <button type="button" class="btn btn-sm btn-outline-secondary"
-                                        data-bs-toggle="modal" data-bs-target="#exampleModal">Edit</button>
+                                        <button
+                                            type="button" class="btn btn-sm btn-outline-secondary view"
+                                            data-bs-toggle="modal" 
+                                            data-bs-target="#exampleModal"
+                                            data-edit-id="${game.id}"
+                                            >                                            
+                                            View
+                                        </button
+                                        >
+
+                                        <button
+                                            type="button" class="btn btn-sm btn-outline-secondary edit"
+                                            data-bs-toggle="modal" 
+                                            data-bs-target="#exampleModal"
+                                            data-edit-id="${game.id}"
+                                            >
+                                            
+                                            Edit
+                                        </button>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </article>`
+        
 	})
+
 }
 
+
 writeDom()
+
+const viewButtons = document.querySelectorAll(".view")
+viewButtons.forEach((btn) => {
+	btn.addEventListener("click", (e) => {
+		viewModal(e.target.getAttribute("data-edit-id"))
+	})
+})
+
+
+function editModal(gameId) {
+	// console.log(gameId, gamesList)
+	// Trouvez le jeu en fonction de son identifiant
+	const result = gamesList.findIndex((game) => game.id === parseInt(gameId))
+	// passer une image comme corps du modal
+	const modalBody = `<h4>ajoutez un formulaire pour modifier le jeu ici</h4>`
+	modifyModal("Mode Edition", modalBody)
+}
+
+function modifyModal(modalTitle, modalBody) {
+	// Écrir le nom du jeu dans le titre du modal
+	document.querySelector(".modal-title").textContent = modalTitle
+	document.querySelector(".modal-body").innerHTML = modalBody
+}
+
+function viewModal(gameId) {
+	// console.log(gameId, gamesList)
+	// Trouvez le jeu en fonction de son identifiant
+	const result = gamesList.findIndex((game) => game.id === parseInt(gameId))
+	const modalBody = `<h2>Hello world !!</h2>`
+	modifyModal(gamesList[result].title, modalBody)
+}
